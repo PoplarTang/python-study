@@ -22,7 +22,23 @@ class Unit:
         self.window.blit(self.img, (self.x, self.y))
 
 class Map(Unit):
-    pass
+
+    def __init__(self, img_path, x, y):
+        # super().__init__(img_path, x, y)
+        self.img1= pygame.image.load(img_path)
+        self.img2= pygame.image.load(img_path)
+        self.x = x
+        self.y = y
+
+    def auto_move(self):
+        self.y += 1
+        if self.y > SCREEN_HEIGHT:
+            self.y = 0
+
+    def display(self):
+        self.window.blit(self.img1, (self.x, self.y))
+        self.window.blit(self.img2, (self.x, self.y - SCREEN_HEIGHT))
+
 
 class Bullet(Unit):
 
@@ -116,7 +132,7 @@ class EnemyPlane(Plane):
 
 
     def auto_move(self):
-        self.y += 2
+        self.y += 3
         if self.y >= SCREEN_HEIGHT or self.is_destroy:
             self.x, self.y = random.randint(0, SCREEN_WIDTH - 100), random.randint(-SCREEN_HEIGHT, -68)
             self.img = pygame.image.load("res/img-plane_%d.png" % random.randint(1, 7))
@@ -129,7 +145,8 @@ def main():
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
     Unit.window = window
-    map = Map("res/img_bg_level_1.jpg", 0,0)
+
+    map = Map("res/img_bg_level_%d.jpg" % random.randint(1, 5), 0,0)
 
     font = pygame.font.Font("res/SIMHEI.TTF", 35)
 
@@ -144,6 +161,8 @@ def main():
         handleEvent(plane)
 
         map.display()
+        map.auto_move()
+
         plane.display()
         plane.displayBullets(enemies)
 
