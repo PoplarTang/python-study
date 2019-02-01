@@ -14,6 +14,7 @@ class Unit:
     window = None
 
     def __init__(self, img_path, x, y):
+        self.img_path = img_path
         self.img = pygame.image.load(img_path)
         self.x = x
         self.y = y
@@ -95,6 +96,7 @@ class Plane(Unit):
 class HeroPlane(Plane):
     def __init__(self, img_path, x, y):
         super().__init__(img_path, x, y)
+        self.life_count = 5
         self.bullets = []
         self.is_hited = False
         self.anim_index = 0
@@ -126,11 +128,14 @@ class HeroPlane(Plane):
 
     def display(self, enemies):
         if self.is_destroy:
-            print("我方挂啦!")
+            if self.life_count > 0:
+                self.life_count -= 1
+                self.is_destroy = False
+                self.img, self.x, self.y = pygame.image.load(self.img_path), 196, SCREEN_HEIGHT - 200
+                print("我方挂啦!")
             return
             # self.is_destroy = False
             # 恢复飞机样式
-            # self.img, self.x, self.y = pygame.image.load("res/hero.png"), 196, SCREEN_HEIGHT - 200
 
         if self.is_hited:
             self.plane_down_anim()
@@ -273,7 +278,7 @@ class Game:
             self.clock.tick(100)
 
             # time.sleep(0.02)
-            if self.plane_player_1.is_destroy and self.plane_player_2.is_destroy:
+            if self.plane_player_1.life_count == 0 and self.plane_player_2.life_count == 0:
                 break
 
         # 游戏凉凉, 让用户决定重新开始还是退出
