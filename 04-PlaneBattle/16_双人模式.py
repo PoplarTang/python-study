@@ -8,7 +8,6 @@ import random
 ENEMY_COUNT = 5
 SCREEN_WIDTH = 512
 SCREEN_HEIGHT = 768
-score = 0
 
 
 class Unit:
@@ -48,6 +47,12 @@ class Map(Unit):
 
 
 class Bullet(Unit):
+    def __init__(self, img_path, host, **kwargs):
+        self.img = pygame.image.load(img_path)
+        self.x = host.x + kwargs["offset"]
+        self.y = host.y - self.get_height()
+        self.host = host
+
     def auto_move(self):
         self.y -= 5
 
@@ -94,17 +99,22 @@ class HeroPlane(Plane):
         self.is_hited = False
         self.anim_index = 0
         self.is_destroy = False
+        self.score = 0
 
     def fire(self):
+        if self.is_destroy:
+            return
         """发射子弹"""
-        bullet1 = Bullet("res/bullet_11.png", self.x , self.y - 59)
-        bullet = Bullet("res/bullet_11.png", self.x + self.get_width() / 2 - 10, self.y - 31)
-        bullet2 = Bullet("res/bullet_11.png", self.x + self.get_width() - 18, self.y - 59)
+        bullet1 = Bullet("res/bullet_12.png", self, offset=0)
+        bullet = Bullet("res/bullet_11.png", self, offset=self.get_width() / 2 - 10)
+        bullet2 = Bullet("res/bullet_12.png", self, offset=self.get_width() - 20)
         self.bullets.append(bullet)
         self.bullets.append(bullet1)
         self.bullets.append(bullet2)
 
     def is_hit_enemy(self, enemy):
+        if self.is_destroy:
+            return False
         """
         判断和指定敌机是否碰撞
         :param enemy: 敌机
@@ -117,9 +127,10 @@ class HeroPlane(Plane):
     def display(self, enemies):
         if self.is_destroy:
             print("我方挂啦!")
+            return
             # self.is_destroy = False
             # 恢复飞机样式
-            self.img, self.x, self.y = pygame.image.load("res/hero.png"), 196, SCREEN_HEIGHT - 200
+            # self.img, self.x, self.y = pygame.image.load("res/hero.png"), 196, SCREEN_HEIGHT - 200
 
         if self.is_hited:
             self.plane_down_anim()
@@ -153,8 +164,7 @@ class HeroPlane(Plane):
                 for enemy in enemies:
                     if not enemy.is_hited and bullet.is_hit_enemy(enemy):
                         enemy.is_hited = True
-                        global score
-                        score += 10
+                        bullet.host.score += 10
                         self.bullets.pop(i)
                         break
             else:
@@ -216,9 +226,10 @@ class Game:
 
         self.map = Map("res/img_bg_level_%d.jpg" % random.randint(1, 5), 0, 0)
 
-        self.font = pygame.font.Font("res/SIMHEI.TTF", 35)
+        self.font = pygame.font.Font("res/SIMHEI.TTF", 26)
 
-        self.plane = HeroPlane("res/hero2.png", 196, SCREEN_HEIGHT - 200)
+        self.plane_player_1 = HeroPlane("res/hero.png", 156, SCREEN_HEIGHT - 200)
+        self.plane_player_2 = HeroPlane("res/hero2.png", 236, SCREEN_HEIGHT - 200)
         self.enemies = []
         for _ in range(ENEMY_COUNT):
             self.enemies.append(EnemyPlane("res/img-plane_%d.png" % random.randint(1, 7),
@@ -236,26 +247,31 @@ class Game:
     def start(self):
         while True:
             # 处理游戏进行事件
-            handleEvent(self.plane)
+            handleEvent(self.plane_player_1, self.plane_player_2)
 
             # 处理游戏进行渲染
             self.map.display()
             self.map.auto_move()
-            self.plane.display(self.enemies)
-            self.plane.displayBullets(self.enemies)
+
+            self.plane_player_1.display(self.enemies)
+            self.plane_player_1.displayBullets(self.enemies)
+
+            self.plane_player_2.display(self.enemies)
+            self.plane_player_2.displayBullets(self.enemies)
 
             for enemy in self.enemies:
                 enemy.display()
                 enemy.auto_move()
 
-            text_obj = self.font.render("得分: %d" % score, 1, (255, 255, 255))
-            self.window.blit(text_obj, (20, 20))
+            self.window.blit(self.font.render("player1得分: %d" % self.plane_player_1.score, 1, (255, 255, 255)), (20, 20))
+            self.window.blit(self.font.render("player2得分: %d" % self.plane_player_2.score, 1, (255, 255, 255)), (50, 20))
 
             pygame.display.update()
 
             self.clock.tick(100)
+
             # time.sleep(0.02)
-            if self.plane.is_destroy:
+            if self.plane_player_1.is_destroy and self.plane_player_2.is_destroy:
                 break
 
         # 游戏凉凉, 让用户决定重新开始还是退出
@@ -300,7 +316,7 @@ def main():
         game.start()
 
 
-def handleEvent(plane):
+def handleEvent(player1, player2):
     for event in pygame.event.get():
         if event.type == QUIT:  # 鼠标点击右上角退出按钮
             print("quit")
@@ -311,25 +327,47 @@ def handleEvent(plane):
                 print("quit")
                 pygame.quit()
                 sys.exit()
-            elif event.key == K_LEFT or event.key == K_a:
-                plane.move_left()
-            elif event.key == K_RIGHT or event.key == K_d:
-                plane.move_right()
-            elif event.key == K_UP or event.key == K_w:
-                plane.move_up()
-            elif event.key == K_DOWN or event.key == K_s:
-                plane.move_down()
+
+            if event.key == K_a:
+                player1.move_left()
+            elif event.key == K_d:
+                player1.move_right()
+            elif event.key == K_w:
+                player1.move_up()
+            elif event.key == K_s:
+                player1.move_down()
             elif event.key == K_SPACE:
-                plane.fire()
+                player1.fire()
+
+            if event.key == K_LEFT:
+                player2.move_left()
+            elif event.key == K_RIGHT:
+                player2.move_right()
+            elif event.key == K_UP:
+                player2.move_up()
+            elif event.key == K_DOWN:
+                player2.move_down()
+            elif event.key == K_KP_PLUS or event.key == K_KP_ENTER:
+                player2.fire()
+
     pressed_keys = pygame.key.get_pressed()
-    if pressed_keys[K_LEFT] or pressed_keys[K_a]:
-        plane.move_left()
-    elif pressed_keys[K_RIGHT] or pressed_keys[K_d]:
-        plane.move_right()
-    if pressed_keys[K_UP] or pressed_keys[K_w]:
-        plane.move_up()
-    elif pressed_keys[K_DOWN] or pressed_keys[K_s]:
-        plane.move_down()
+    if pressed_keys[K_a]:
+        player1.move_left()
+    elif pressed_keys[K_d]:
+        player1.move_right()
+    if pressed_keys[K_w]:
+        player1.move_up()
+    elif pressed_keys[K_s]:
+        player1.move_down()
+
+    if pressed_keys[K_LEFT] :
+        player2.move_left()
+    elif pressed_keys[K_RIGHT] :
+        player2.move_right()
+    if pressed_keys[K_UP] :
+        player2.move_up()
+    elif pressed_keys[K_DOWN] :
+        player2.move_down()
 
         # if pressed_keys[K_SPACE]:
         #     plane.fire()
