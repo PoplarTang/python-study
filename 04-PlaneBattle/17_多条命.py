@@ -5,7 +5,7 @@ import sys
 import time
 import random
 
-ENEMY_COUNT = 5
+ENEMY_COUNT = 10
 SCREEN_WIDTH = 512
 SCREEN_HEIGHT = 768
 
@@ -58,7 +58,8 @@ class Bullet(Unit):
         self.y -= 5
 
     def __del__(self):
-        print("子弹销毁了 [%d,%d]" % (self.x, self.y))
+        pass
+        # print("子弹销毁了 [%d,%d]" % (self.x, self.y))
 
     def is_hit_enemy(self, enemy):
         """
@@ -102,10 +103,17 @@ class HeroPlane(Plane):
         self.anim_index = 0
         self.is_destroy = False
         self.score = 0
+        self.last_fire = time.time()
 
     def fire(self):
         if self.is_destroy:
             return
+
+        if time.time() - self.last_fire < 0.2:
+            return
+        else:
+            self.last_fire = time.time()
+
         """发射子弹"""
         bullet1 = Bullet("res/bullet_12.png", self, offset=0)
         bullet = Bullet("res/bullet_11.png", self, offset=self.get_width() / 2 - 10)
@@ -117,6 +125,7 @@ class HeroPlane(Plane):
     def is_hit_enemy(self, enemy):
         if self.is_destroy:
             return False
+
         """
         判断和指定敌机是否碰撞
         :param enemy: 敌机
@@ -162,7 +171,7 @@ class HeroPlane(Plane):
         """显示当前飞机发出的子弹"""
         for i in range(len(self.bullets) - 1, -1, -1):
             bullet = self.bullets[i]
-            if bullet.y >= -31:
+            if bullet.y >= -bullet.get_height():
                 bullet.display()
                 bullet.auto_move()
 
@@ -222,6 +231,9 @@ class Game:
         pygame.mixer.music.load("res/bg2.ogg")
 
         pygame.mixer.music.play(-1)
+
+        self.player_double = False
+
         # 游戏结束的音效（超级玛丽）
         self.gameover_sound = pygame.mixer.Sound("res/gameover.wav")
 
@@ -231,7 +243,7 @@ class Game:
 
         self.map = Map("res/img_bg_level_%d.jpg" % random.randint(1, 5), 0, 0)
 
-        self.font = pygame.font.Font("res/SIMHEI.TTF", 26)
+        self.font = pygame.font.Font("res/SIMHEI.TTF", 16)
 
         self.plane_player_1 = HeroPlane("res/hero.png", 146, SCREEN_HEIGHT - 200)
         self.plane_player_2 = HeroPlane("res/hero2.png", 246, SCREEN_HEIGHT - 200)
@@ -250,6 +262,12 @@ class Game:
         self.window.blit(text, (x, y))
 
     def start(self):
+        # 让用户决定重新开始还是退出
+        self.showInputOrder()
+        # 进行游戏
+        self.show_game()
+
+    def show_game(self):
         while True:
             # 处理游戏进行事件
             handleEvent(self.plane_player_1, self.plane_player_2)
@@ -258,31 +276,44 @@ class Game:
             self.map.display()
             self.map.auto_move()
 
-            self.plane_player_1.display(self.enemies)
-            self.plane_player_1.displayBullets(self.enemies)
+            # 将还没显示到屏幕里的飞机过滤掉
 
-            self.plane_player_2.display(self.enemies)
-            self.plane_player_2.displayBullets(self.enemies)
+            # if enemy.y < -enemy.get_height():
+            #     return False
+            tempEnemies = list(filter(lambda enemy: enemy.y >= -enemy.get_height(), self.enemies))
+            # print("{0:d} => {1:d}".format(len(self.enemies), len(tempEnemies)))
 
             for enemy in self.enemies:
                 enemy.display()
                 enemy.auto_move()
 
-            scoreText_1 = self.font.render("player1得分: %d" % self.plane_player_1.score, 1, (255, 255, 255))
+            self.plane_player_1.display(tempEnemies)
+            self.plane_player_1.displayBullets(tempEnemies)
+            scoreText_1 = self.font.render(
+                "player1: %s %d" % ("★" * self.plane_player_1.life_count, self.plane_player_1.score), 1,
+                (255, 255, 255))
             self.window.blit(scoreText_1, (20, 20))
-            scoreText_2 = self.font.render("player2得分: %d" % self.plane_player_2.score, 1, (255, 255, 255))
-            self.window.blit(scoreText_2, (20, scoreText_1.get_height() + 20))
+
+            if self.player_double:
+                self.plane_player_2.display(tempEnemies)
+                self.plane_player_2.displayBullets(tempEnemies)
+                scoreText_2 = self.font.render(
+                    "player2: %s %d" % ("★" * self.plane_player_2.life_count, self.plane_player_2.score), 1,
+                    (255, 255, 255))
+                self.window.blit(scoreText_2, (20, scoreText_1.get_height() + 20))
 
             pygame.display.update()
 
             self.clock.tick(100)
 
             # time.sleep(0.02)
-            if self.plane_player_1.life_count == 0 and self.plane_player_2.life_count == 0:
-                break
 
-        # 游戏凉凉, 让用户决定重新开始还是退出
-        self.showInputOrder()
+            if not self.player_double:
+                if self.plane_player_1.life_count == 0 :
+                    break
+            else:
+                if self.plane_player_1.life_count == 0 and self.plane_player_2.life_count == 0:
+                    break
 
     def showInputOrder(self):
 
@@ -292,7 +323,8 @@ class Game:
 
         self.map.display()
         self.draw_text("飞机大战", 40, SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 3)
-        self.draw_text("按Enter开始游戏，Esc退出游戏.", 28, SCREEN_WIDTH / 3 - 140, SCREEN_HEIGHT / 2)
+        self.draw_text("按Enter开始游戏，Esc退出游戏.", 22, SCREEN_WIDTH / 3 - 140, SCREEN_HEIGHT / 3 + 60)
+        self.draw_text("单人按1，双人按2.", 22, SCREEN_WIDTH / 3 - 140, SCREEN_HEIGHT / 3 + 120)
         pygame.display.update()
         self.handleOrderEvent()
 
@@ -306,14 +338,19 @@ class Game:
                     sys.exit()
                     return
                 elif event.type == KEYDOWN:
+                    global score
+                    score = 0
                     if event.key == K_ESCAPE:
                         sys.exit()
                         pygame.quit()
                         return
-                    if event.key == K_RETURN:
-                        self.waiting_order = False
-                        global score
-                        score = 0
+                    elif event.key == K_RETURN:
+                        return
+                    elif event.key == K_1:
+                        self.player_double = False
+                        return
+                    elif event.key == K_2:
+                        self.player_double = True
                         return
 
 
@@ -367,6 +404,9 @@ def handleEvent(player1, player2):
     elif pressed_keys[K_s]:
         player1.move_down()
 
+    if pressed_keys[K_SPACE]:
+        player1.fire()
+
     if pressed_keys[K_LEFT] :
         player2.move_left()
     elif pressed_keys[K_RIGHT] :
@@ -376,8 +416,6 @@ def handleEvent(player1, player2):
     elif pressed_keys[K_DOWN] :
         player2.move_down()
 
-        # if pressed_keys[K_SPACE]:
-        #     plane.fire()
 
 
 if __name__ == '__main__':
