@@ -1,7 +1,7 @@
 
 def solution1(number):
     """
-    https://www.codewars.com/kata/multiples-of-3-or-5/solutions/python/me/best_practice
+    https://www.06-codewars.com/kata/multiples-of-3-or-5/solutions/python/me/best_practice
     """
     return sum(i for i in range(number) if i % 5 == 0 or i % 3 == 0 )
 

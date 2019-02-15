@@ -7,7 +7,9 @@ app = QApplication(sys.argv)
 class Example(QWidget):
     def __init__(self):
         super().__init__()
+        # 设置x,y,width,height
         self.setGeometry(800, 200, 480,320)
+        # 图标
         self.setWindowIcon(QIcon("图片7.gif"))
         self.setWindowTitle("标题")
         self.show()
