@@ -9,6 +9,8 @@ print(str[-2:-7:-1])
 
 str = "hello"
 
+print(str.ljust(10, "="))
+
 str = str.center(30, "-")
 print(str)
 

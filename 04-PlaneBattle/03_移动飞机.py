@@ -1,10 +1,36 @@
 import pygame
 from pygame.locals import *
 import sys
+import time
+from collections import deque
 
 SCREEN_WIDTH = 512
 SCREEN_HEIGHT = 768
 
+time_latest = None
+time_arr = deque([])
+
+def calc_dps():
+    """
+    每秒多少帧 60dps
+    1 / 最近10帧的平均间隔
+    :return: 帧数
+    """
+    global time_latest
+    global time_arr
+    current = time.time()
+
+    if not time_latest:
+        time_latest = time.time()
+    else:
+        duration = current - time_latest
+        time_arr.append(duration)
+        time_latest = current
+        if len(time_arr) > 10:
+            time_arr.popleft()
+            average = sum(time_arr) / len(time_arr)
+            dps = round(1 / average)
+            print(dps)
 
 def main():
     pygame.init()
@@ -20,6 +46,8 @@ def main():
     clock = pygame.time.Clock()
 
     while True:
+
+        calc_dps()
         for event in pygame.event.get():
             if event.type == QUIT:  # 鼠标点击右上角退出按钮
                 print("quit")
@@ -61,7 +89,7 @@ def main():
         window.blit(hero, (hero_x, hero_y))
 
         pygame.display.update()
-
+        # time.sleep(0.01)
 
 if __name__ == '__main__':
     main()

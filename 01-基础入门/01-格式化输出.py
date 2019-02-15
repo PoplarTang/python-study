@@ -14,3 +14,6 @@ str = "我叫%s, 今年%d, 身高%.2f, 学号: %05d" % (name, age, height, id)
 print(str)
 
 print(0.1+0.2)
+
+# 300 / 60 = 5
+

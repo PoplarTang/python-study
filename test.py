@@ -1,4 +1,5 @@
 from random import randint
+from functools import reduce
 
 def test():
     for i in range(10):
@@ -25,7 +26,19 @@ def iter_del():
 
     print(list1)
 
+def solution(number):
+    rst = 0
+    for i in range(number):
+        if i % 5 == 0 or i % 3 == 0:
+            print(i)
+            rst += i
+    return rst
+
+def solution1(number):
+    return sum(i for i in range(number) if i % 5 == 0 or i % 3 == 0 )
+
 if __name__ == '__main__':
     # test()
     # chengfabiao()
-    iter_del()
+    # iter_del()
+    print(solution1(10))

@@ -1,11 +1,11 @@
 import pygame
-
+from collections import deque
 from pygame.locals import *
 import sys
 import time
 import random
 
-ENEMY_COUNT = 10
+ENEMY_COUNT = 5
 SCREEN_WIDTH = 512
 SCREEN_HEIGHT = 768
 
@@ -109,7 +109,7 @@ class HeroPlane(Plane):
         if self.is_destroy:
             return
 
-        if time.time() - self.last_fire < 0.2:
+        if time.time() - self.last_fire < 0.12:
             return
         else:
             self.last_fire = time.time()
@@ -123,6 +123,8 @@ class HeroPlane(Plane):
         self.bullets.append(bullet2)
 
     def is_hit_enemy(self, enemy):
+        # if True: return False
+
         if self.is_destroy:
             return False
 
@@ -254,6 +256,27 @@ class Game:
                                            random.randint(-SCREEN_HEIGHT, -68)))
 
         self.clock = pygame.time.Clock()
+        self.time_arr = deque([], maxlen=10)
+        self.time_latest = None
+        self.dps = 0
+
+    def calc_dps(self):
+        """
+        每秒多少帧 60dps
+        1 / 最近10帧的平均间隔
+        :return: 帧数
+        """
+        current = time.time()
+        if not self.time_latest:
+            self.time_latest = current
+
+        duration = current - self.time_latest
+        self.time_arr.append(duration)
+        self.time_latest = current
+
+        average = (sum(self.time_arr) / len(self.time_arr))
+        if average:
+            self.dps = round(1 / average)
 
     def draw_text(self, content, size, x, y):
         # font_obj = pygame.font.SysFont("simhei", size)
@@ -269,6 +292,8 @@ class Game:
 
     def show_game(self):
         while True:
+            self.calc_dps()
+
             # 处理游戏进行事件
             handleEvent(self.plane_player_1, self.plane_player_2)
 
@@ -280,27 +305,29 @@ class Game:
 
             # if enemy.y < -enemy.get_height():
             #     return False
-            tempEnemies = list(filter(lambda enemy: enemy.y >= -enemy.get_height(), self.enemies))
+
+            tempEnemies = [enemy for enemy in self.enemies if enemy.y >= -enemy.get_height()]
+            # tempEnemies = list(filter(lambda enemy: enemy.y >= -enemy.get_height(), self.enemies))
             # print("{0:d} => {1:d}".format(len(self.enemies), len(tempEnemies)))
 
             for enemy in self.enemies:
                 enemy.display()
                 enemy.auto_move()
 
+
             self.plane_player_1.display(tempEnemies)
             self.plane_player_1.displayBullets(tempEnemies)
-            scoreText_1 = self.font.render(
-                "player1: %s %d" % ("★" * self.plane_player_1.life_count, self.plane_player_1.score), 1,
-                (255, 255, 255))
+            scoreText_1 = self.font.render("player1: %s %d" % ("★" * self.plane_player_1.life_count, self.plane_player_1.score), 1, (255, 255, 255))
             self.window.blit(scoreText_1, (20, 20))
 
             if self.player_double:
                 self.plane_player_2.display(tempEnemies)
                 self.plane_player_2.displayBullets(tempEnemies)
-                scoreText_2 = self.font.render(
-                    "player2: %s %d" % ("★" * self.plane_player_2.life_count, self.plane_player_2.score), 1,
-                    (255, 255, 255))
+                scoreText_2 = self.font.render("player2: %s %d" % ("★" * self.plane_player_2.life_count, self.plane_player_2.score), 1, (255, 255, 255))
                 self.window.blit(scoreText_2, (20, scoreText_1.get_height() + 20))
+
+            if self.dps:
+                self.draw_text("dps: {0:3d}".format(self.dps), 16, SCREEN_WIDTH - 80, 20)
 
             pygame.display.update()
 
