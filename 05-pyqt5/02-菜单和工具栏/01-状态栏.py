@@ -8,7 +8,8 @@ class Example(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.statusBar().showMessage('Ready')
+        bar = self.statusBar()
+        bar.showMessage('Ready')
 
         self.resize(480, 360)
         self.show()
