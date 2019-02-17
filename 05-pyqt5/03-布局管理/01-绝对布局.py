@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PyQt5.QtWidgets import (QApplication, QWidget, QLabel)
 import sys
 
 app = QApplication(sys.argv)
