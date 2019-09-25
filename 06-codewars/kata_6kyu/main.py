@@ -17,7 +17,28 @@ def disemvowel1(string):
 def disemvowel(string):
     return string.translate(None,)
 
+
+def duplicate_count(text):
+    """ 已通过
+    https://www.codewars.com/kata/counting-duplicates/train/python
+    """
+    arr = list(text.lower())
+    counter = dict()
+    for i in arr:
+        counter[i] = counter.get(i, 0) + 1
+
+    print(counter)
+    rst = 0
+    for value in counter.values():
+        if value > 1:
+            rst += 1
+    return rst
+
 if __name__ == '__main__':
     # print(solution1(10))
     # print(getCount("abracadabra"))
-    print(disemvowel("This website is for losers LOL!"))
+    # print(disemvowel("This website is for losers LOL!"))
+    count = duplicate_count("indivisibility")
+    print(count) # 1
+    count = duplicate_count("aabBcde")
+    print(count) # 2
