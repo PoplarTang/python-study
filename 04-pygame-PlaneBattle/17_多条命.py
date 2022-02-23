@@ -5,7 +5,7 @@ import sys
 import time
 import random
 
-ENEMY_COUNT = 5
+ENEMY_COUNT = 10
 SCREEN_WIDTH = 512
 SCREEN_HEIGHT = 768
 
