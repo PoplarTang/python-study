@@ -20,7 +20,7 @@ def init_gpio(gpio_num):
 def set_angle(angle_degrees):
     gpio.set_output(GPIO_PIN_LED, 1 if angle_degrees <= 90 else 0)
 
-    high_time = 500 + angle_degrees * (2500 - 500) / 180.0
+    high_time = int(500 + angle_degrees * (2480 - 500) / 180.0)
     print("1----------angle:{} time:{}".format(angle_degrees, high_time))
 
     global pre_angle
@@ -35,26 +35,22 @@ def set_angle(angle_degrees):
     for i in range(fraq_count):
         gpio.set_output(GPIO_PIN_SERVO, 1)
         ohos.usleep(int(high_time))
-        # ohos.sleep(high_time * 0.001 * 0.001)
         gpio.set_output(GPIO_PIN_SERVO, 0)
         ohos.usleep(int(ONE_CYCLE_TIME - high_time))
-        # ohos.sleep(0.02 - high_time * 0.001 * 0.001)
     print("2----------angle:{} time:{} fraq_count:{}".format(angle_degrees, high_time, fraq_count))
 
 
 def set_angle2(angle_degrees):
     gpio.set_output(GPIO_PIN_LED, 1 if angle_degrees <= 90 else 0)
 
-    high_time = 500 + angle_degrees * (2500 - 500) / 180.0
+    high_time = 500 + angle_degrees * (2480 - 500) / 180.0
     print("1----------angle:{} time:{}".format(angle_degrees, high_time))
 
     for i in range(50):
         gpio.set_output(GPIO_PIN_SERVO, 1)
         ohos.usleep(int(high_time))
-        # ohos.sleep(high_time * 0.001 * 0.001)
         gpio.set_output(GPIO_PIN_SERVO, 0)
         ohos.usleep(int(ONE_CYCLE_TIME - high_time))
-        # ohos.sleep(0.02 - high_time * 0.001 * 0.001)
     print("2----------angle:{} time:{}".format(angle_degrees, high_time))
 
 
@@ -64,8 +60,8 @@ if __name__ == '__main__':
 
     print("-----------init complete!")
 
-    # set_angle(90)
-    # ohos.sleep(0.5)
+    set_angle(90)
+    ohos.sleep(0.5)
     #
     # set_angle(0)
     # ohos.sleep(0.5)
@@ -73,13 +69,16 @@ if __name__ == '__main__':
     # set_angle(180)
     # ohos.sleep(0.5)
 
-    for i in range(7):
-        set_angle(i * 30)
+    for i in range(4):
+        set_angle(i * 45)
         ohos.sleep(0.5)
 
-    for i in range(6, -1, -1):
-        set_angle(i * 30)
+    for i in range(4, -1, -1):
+        set_angle(i * 45)
         ohos.usleep(int(0.5 * 1000 * 1000))
+
+    set_angle(90)
+    ohos.sleep(0.5)
 
     gpio.gpio_deinit(GPIO_PIN_LED)
     gpio.gpio_deinit(GPIO_PIN_SERVO)

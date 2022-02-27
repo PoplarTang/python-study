@@ -5,7 +5,7 @@ if __name__ == '__main__':
 
     print("-----------init complete!")
 
-    for i in range(5):
+    for i in range(4):
         switch.set_angle(i * 45)
         ohos.sleep(0.5)
 

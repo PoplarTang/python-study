@@ -15,7 +15,7 @@ gpio.set_func(gpio_num, func)
 
 gpio.set_dir(gpio_num, gpio.dir_out)
 
-while True:
+for i in range(10):
     if current == 0:
         current = 1
     else:
@@ -24,11 +24,11 @@ while True:
     gpio.set_output(gpio_num, current)
 
     cur_tick = os.get_tick()
-    # os.sleep(2)
+    # os.sleep(1)
     ohos.usleep(1 * 1000 * 1000)
 
     end_tick = os.get_tick()
-    print("---------------gpio: {} current: {} tick: {}".format(gpio_num, current, end_tick))
+    print("os---------------i: {} gpio: {} current: {} tick: {}".format(i, gpio_num, current, end_tick))
 
 
 gpio.gpio_deinit(gpio_num)
