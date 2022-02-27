@@ -1,5 +1,6 @@
 import gpio
 import os
+import ohos
 
 current = 0
 
@@ -24,7 +25,7 @@ while True:
 
     cur_tick = os.get_tick()
     # os.sleep(2)
-    os.usleep(1 * 1000 * 1000)
+    ohos.usleep(1 * 1000 * 1000)
 
     end_tick = os.get_tick()
     print("---------------gpio: {} current: {} tick: {}".format(gpio_num, current, end_tick))
