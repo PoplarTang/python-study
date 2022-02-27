@@ -1,9 +1,9 @@
 import gpio
 import ohos
 
-GPIO_PIN_LED = 2
-GPIO_PIN_SERVO = 13
-ONE_CYCLE_TIME = 20000
+GPIO_PIN_LED = 2    # LED灯引脚
+GPIO_PIN_SERVO = 13 # 舵机引脚
+ONE_CYCLE_TIME = 20000 # 每个周期的总时长，单位微秒μm
 
 FREQUENCY_PWM_CONTROL = 50  # 50hz 每秒50个周期
 pre_angle = -1

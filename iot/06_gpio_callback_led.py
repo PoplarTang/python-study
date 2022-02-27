@@ -44,6 +44,7 @@ print("pull_up-----------------------: ", pull_up)
 gpio.set_pull(button, pull_up)
 gpio.set_isr_mode(button, gpio.fall_low)
 gpio.register_isr_func(button, button_callback, [os.get_tick()])
+print("waiting for click-----------------------: ", os.get_tick())
 
 # while True:
 #     os.sleep(1)
