@@ -29,13 +29,8 @@ class Bullet(Unit):
     def auto_move(self):
         self.y -= 5
     def __del__(self):
-        print("子弹销毁了 [%d,%d]" % (self.x, self.y))
+        print("子弹销毁了 x=%d" % self.x)
 
-    def is_hit_enemy(self, enemy):
-        return pygame.Rect.colliderect(
-            pygame.Rect(self.x, self.y, 20, 31),
-            pygame.Rect(enemy.x, enemy.y, 100, 68)
-        )
 
 class Plane(Unit):
     def move_left(self):
@@ -58,7 +53,6 @@ class Plane(Unit):
         if self.y > SCREEN_HEIGHT - 78:
             self.y = SCREEN_HEIGHT - 78
 
-
 class HeroPlane(Plane):
     def __init__(self, img_path, x, y):
         super().__init__(img_path, x, y)
@@ -69,70 +63,32 @@ class HeroPlane(Plane):
         bullet = Bullet("res/bullet_9.png", self.x + 60 - 10, self.y - 31)
         self.bullets.append(bullet)
 
-    def displayBullets(self, enemies):
+    def displayBullets(self):
         """显示当前飞机发出的子弹"""
         for i in range(len(self.bullets) - 1, -1, -1):
             bullet = self.bullets[i]
             if bullet.y >= -31:
                 bullet.display()
                 bullet.auto_move()
-
-                for enemy in enemies:
-                    if not enemy.is_hited and bullet.is_hit_enemy(enemy):
-                        enemy.is_hited = True
-                        global score
-                        score += 10
-                        self.bullets.pop(i)
-                        break
             else:
                 self.bullets.pop(i)
                 # del self.bullets[i]
                 # self.bullets.remove(bullet)
 
 class EnemyPlane(Plane):
-
-
-    def __init__(self, img_path, x, y):
-        super().__init__(img_path, x, y)
-        self.is_hited = False
-        self.anim_index = 0
-        self.is_destroy = False
-
-    def plane_down_anim(self):
-        if self.anim_index >= 21:
-            self.is_hited = False
-            self.is_destroy = True
-            self.anim_index = 0
-            # 恢复飞机样式
-            return
-
-        self.img = pygame.image.load("res/bomb-%d.png" % (self.anim_index // 3 + 1))
-        self.anim_index += 1
-
-    def display(self):
-        if self.is_hited:
-            self.plane_down_anim()
-        super().display()
-
-
     def auto_move(self):
-        self.y += 2
-        if self.y >= SCREEN_HEIGHT or self.is_destroy:
+        self.y += 5
+        if self.y >= SCREEN_HEIGHT:
             self.x, self.y = random.randint(0, SCREEN_WIDTH - 100), random.randint(-SCREEN_HEIGHT, -68)
             self.img = pygame.image.load("res/img-plane_%d.png" % random.randint(1, 7))
-            self.is_destroy = False
 
-score = 0
 def main():
     pygame.init()
 
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
     Unit.window = window
-    map = Map("res/img_bg_level_1.jpg", 0,0)
-
-    font = pygame.font.Font("res/SIMHEI.TTF", 35)
-
+    map = Map("res/img_bg_level_1.jpg", 0, 0)
     plane = HeroPlane("res/hero2.png", 196, SCREEN_HEIGHT - 200)
     enemies = []
     for _ in range(ENEMY_COUNT):
@@ -145,14 +101,11 @@ def main():
 
         map.display()
         plane.display()
-        plane.displayBullets(enemies)
+        plane.displayBullets()
 
         for enemy in enemies:
             enemy.display()
             enemy.auto_move()
-
-        text_obj = font.render("得分: %d" % score, 1, (255, 255, 255))
-        window.blit(text_obj, (20, 20))
 
         pygame.display.update()
 

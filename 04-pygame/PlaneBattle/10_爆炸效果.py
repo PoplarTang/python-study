@@ -58,6 +58,7 @@ class Plane(Unit):
         if self.y > SCREEN_HEIGHT - 78:
             self.y = SCREEN_HEIGHT - 78
 
+
 class HeroPlane(Plane):
     def __init__(self, img_path, x, y):
         super().__init__(img_path, x, y)
@@ -77,8 +78,8 @@ class HeroPlane(Plane):
                 bullet.auto_move()
 
                 for enemy in enemies:
-                    if bullet.is_hit_enemy(enemy):
-                        enemy.isDestory = True
+                    if not enemy.is_hited and bullet.is_hit_enemy(enemy):
+                        enemy.is_hited = True
                         global score
                         score += 10
                         self.bullets.pop(i)
@@ -93,14 +94,33 @@ class EnemyPlane(Plane):
 
     def __init__(self, img_path, x, y):
         super().__init__(img_path, x, y)
-        self.isDestory = False
+        self.is_hited = False
+        self.anim_index = 0
+        self.is_destroy = False
+
+    def plane_down_anim(self):
+        if self.anim_index >= 21:
+            self.is_hited = False
+            self.is_destroy = True
+            self.anim_index = 0
+            # 恢复飞机样式
+            return
+
+        self.img = pygame.image.load("res/bomb-%d.png" % (self.anim_index // 3 + 1))
+        self.anim_index += 1
+
+    def display(self):
+        if self.is_hited:
+            self.plane_down_anim()
+        super().display()
+
 
     def auto_move(self):
-        self.y += 5
-        if self.y >= SCREEN_HEIGHT or self.isDestory:
+        self.y += 2
+        if self.y >= SCREEN_HEIGHT or self.is_destroy:
             self.x, self.y = random.randint(0, SCREEN_WIDTH - 100), random.randint(-SCREEN_HEIGHT, -68)
             self.img = pygame.image.load("res/img-plane_%d.png" % random.randint(1, 7))
-            self.isDestory = False
+            self.is_destroy = False
 
 score = 0
 def main():
@@ -109,7 +129,7 @@ def main():
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
     Unit.window = window
-    map = Map("res/img_bg_level_1.jpg", 0,0)
+    map = Map("res/img_bg_level_1.jpg", 0, 0)
 
     font = pygame.font.Font("res/SIMHEI.TTF", 35)
 

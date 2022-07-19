@@ -11,12 +11,11 @@ SCREEN_HEIGHT = 768
 
 
 class Unit:
-    window = None
-
-    def __init__(self, img_path, x, y):
+    def __init__(self, img_path, x, y, window):
         self.img = pygame.image.load(img_path)
         self.x = x
         self.y = y
+        self.window = window
 
     def display(self):
         self.window.blit(self.img, (self.x, self.y))
@@ -25,11 +24,8 @@ class Map(Unit):
     pass
 
 class Bullet(Unit):
-
     def auto_move(self):
         self.y -= 5
-    def __del__(self):
-        print("子弹销毁了 x=%d" % self.x)
 
 
 class Plane(Unit):
@@ -54,13 +50,13 @@ class Plane(Unit):
             self.y = SCREEN_HEIGHT - 78
 
 class HeroPlane(Plane):
-    def __init__(self, img_path, x, y):
-        super().__init__(img_path, x, y)
+    def __init__(self, img_path, x, y, window):
+        super().__init__(img_path, x, y, window)
         self.bullets = []
 
     def fire(self):
         """发射子弹"""
-        bullet = Bullet("res/bullet_9.png", self.x + 60 - 10, self.y - 31)
+        bullet = Bullet("res/bullet_9.png", self.x + 60 - 10, self.y - 31, self.window)
         self.bullets.append(bullet)
 
     def displayBullets(self):
@@ -87,12 +83,11 @@ def main():
 
     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-    Unit.window = window
-    map = Map("res/img_bg_level_1.jpg", 0,0)
-    plane = HeroPlane("res/hero2.png", 196, SCREEN_HEIGHT - 200)
+    map = Map("res/img_bg_level_1.jpg", 0, 0, window)
+    plane = HeroPlane("res/hero2.png", 196, SCREEN_HEIGHT - 200, window)
     enemies = []
     for _ in range(ENEMY_COUNT):
-        enemies.append(EnemyPlane("res/img-plane_%d.png" % random.randint(1, 7), random.randint(0, SCREEN_WIDTH - 100), random.randint(-SCREEN_HEIGHT, -68)))
+        enemies.append(EnemyPlane("res/img-plane_%d.png" % random.randint(1, 7), random.randint(0, SCREEN_WIDTH - 100), random.randint(-SCREEN_HEIGHT, -68), window))
 
     clock = pygame.time.Clock()
 

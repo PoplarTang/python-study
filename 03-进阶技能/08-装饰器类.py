@@ -41,17 +41,17 @@ class email_logit(logit):
     def notify(self, func_name, *args, **kwargs):
         # 发送一封email到self.email
         # 这里就不做实现了
-        print('Sending email to', self.email)
+        print('Sending email to {}, args: {}'.format(self.email, args))
 
 @logit()
 def myfunc1():
     pass
 
 @email_logit()
-def myfunc2():
+def myfunc2(a, b):
     pass
 
 
 if __name__ == '__main__':
     myfunc1()
-    myfunc2()
+    myfunc2(123, "haha")
