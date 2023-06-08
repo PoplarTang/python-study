@@ -1,0 +1,6 @@
+python-socketio
+websocket-client
+eventlet
+requests
+
+pygame

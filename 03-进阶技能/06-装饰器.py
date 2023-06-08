@@ -24,7 +24,6 @@ def index(x, y, z):
     time.sleep(3)
     print('index %s %s %s' % (x, y, z))
 
-
 @timmer  # home=timmer(ome)
 def home(name):
     time.sleep(2)

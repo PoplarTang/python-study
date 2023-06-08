@@ -4,3 +4,5 @@ dist
 *.spec
 __pycache__/
 *.log
+/10-socket_io/.idea
+/04-pygame/PlaneBattle/*.zip

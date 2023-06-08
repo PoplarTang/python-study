@@ -14,16 +14,21 @@ class Snake:  # 蛇类
             self.add_node()
 
     def add_node(self):
-        node = pygame.Rect(((self.body[0].left, self.body[0].top) if self.body else (0, 0)) + (25, 25))  # 随时增加蛇块
+        left_top = (self.body[0].left, self.body[0].top) if self.body else (0, 0)
+        node = pygame.Rect((left_top) + (25, 25))  # 随时增加蛇块
         head_dirction, head_forward = dirction_node[self.dirction]
         value = getattr(node, head_dirction) + head_forward
         setattr(node, head_dirction, value)
 
-        if node.x >= SCREEN: node.x -= SCREEN
-        elif node.x < 0: node.x += SCREEN
+        if node.x >= SCREEN:
+            node.x -= SCREEN
+        elif node.x < 0:
+            node.x += SCREEN
 
-        if node.y >= SCREEN: node.y -= SCREEN
-        elif node.y < 0: node.y += SCREEN
+        if node.y >= SCREEN:
+            node.y -= SCREEN
+        elif node.y < 0:
+            node.y += SCREEN
 
         self.body.insert(0, node)
 
@@ -65,7 +70,7 @@ def show_text(screen, pos, text, color, font_size=30):
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN, SCREEN))
-    pygame.display.set_caption('贪吃蛇：是男人就坚持到第10关！')
+    pygame.display.set_caption('贪吃蛇')
     snake, food, clock, scores, isdead = Snake(), Food(), pygame.time.Clock(), 0, False
     while True:
         for event in pygame.event.get():
@@ -83,7 +88,7 @@ def main():
         isdead = snake.is_dead()  # 显示死亡文字
         if isdead:
             show_text(screen, (150, 200), '翻车了！', (227, 29, 18), 80)
-            show_text(screen, (50, 320), '是男人就超过45KM/h,按空格键重试...', (0, 0, 22))
+            show_text(screen, (50, 320), '按空格键重试...', (0, 0, 22))
         if food.rect == snake.body[0]:  # 当食物rect与蛇头重合,吃掉 -> Snake增加一个Node
             scores += 1  # 食物处理 / 吃到+1分
             food.remove()

@@ -49,7 +49,7 @@ class Map(Unit):
 
 class Bullet(Unit):
     def __init__(self, img_path, host, **kwargs):
-        self.img = pygame.image.load(img_path)
+        super().__init__(img_path, 0, 0)
         self.x = host.x + kwargs["offset"]
         self.y = host.y - self.get_height()
         self.host = host
@@ -366,14 +366,12 @@ class Game:
                 if event.type == QUIT:
                     pygame.quit()
                     sys.exit()
-                    return
                 elif event.type == KEYDOWN:
                     global score
                     score = 0
                     if event.key == K_ESCAPE:
-                        sys.exit()
                         pygame.quit()
-                        return
+                        sys.exit()
                     elif event.key == K_RETURN:
                         return
                     elif event.key == K_1:
