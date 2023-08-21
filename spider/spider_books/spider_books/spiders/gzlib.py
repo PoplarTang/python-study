@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import scrapy
 from scrapy import Selector
 from scrapy.dupefilters import BaseDupeFilter
@@ -36,12 +38,11 @@ http://opac.gzlib.gov.cn/opac/search?q=嵌入式&searchType=standard&isFacet=tru
 对结果根据id进行去重复
 """
 
-keywords = ['计算机组成原理', '电路分析基础', '模拟电路', '数字电路',
-            'C语言程序设计', 'c++程序设计', ' 电工技术', '电子制作',
-            '印刷电路板', '硬件制造', '单片机', '嵌入式', 'ARM开发',
-            'stm32', 'FPGA', '物联网技术', '传感器技术',
-            'OpenCV', '机器人操作系统', 'ROS']
-keywords2 = ['嵌入式', 'ARM开发']
+keywords = ['计算机组成原理', '电路分析基础', '模拟电路', '数字电路', 'C语言程序设计',
+            'c++程序设计', '电工技术', '电子制作', '印刷电路板', '硬件制造',
+            '单片机', '嵌入式', 'ARM开发', 'stm32', 'FPGA',
+            '物联网技术', '传感器技术', 'OpenCV', '机器人操作系统', 'ROS']
+keywords2 = ['c++程序设计']
 
 
 # 删除字符串中的所有 \r\n, \t符号
@@ -51,7 +52,6 @@ def clean_str(org_str):
 BOOK_TYPE_DICT = {
     "1" : "图书"
 }
-
 
 class GzlibSpider(scrapy.Spider):
     name = "gzlib"
@@ -66,14 +66,18 @@ class GzlibSpider(scrapy.Spider):
             'search_key', 'title', 'publisher', "author",
             "book_isbn", "keywords",
             "borrow_times", "category", "price",
-            "summary", "link", "book_cover"
+             "link", "book_cover", "summary",
         ],
     }
 
 
     def start_requests(self):
         for keyword in keywords:
-            url = f"http://opac.gzlib.gov.cn/opac/search?q={keyword}&searchWay=title&rows=120&searchWay0=marc&sortWay=loannum_sort&sortOrder=desc"
+            url = f"http://opac.gzlib.gov.cn/opac/search?searchWay=title&rows=120&searchWay0=marc&sortWay=loannum_sort&sortOrder=desc"
+            # 将keyword进行url转义
+            keyword_encoded = quote(keyword, encoding='utf-8')
+            # 拼接到url的参数q里
+            url = f"{url}&q={keyword_encoded}"
             # yield scrapy.Request(url=url, callback=self.parse)
             yield scrapy.Request(url=url, cb_kwargs=dict(keyword=keyword), callback=self.parse)
 
