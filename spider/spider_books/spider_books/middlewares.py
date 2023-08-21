@@ -7,7 +7,23 @@ from scrapy import signals
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+from scrapy.dupefilters import BaseDupeFilter
 
+
+class BookDupeFilter(BaseDupeFilter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.visited_ids = set()
+
+    def request_seen(self, request):
+        if 'book_item' not in request.meta:
+            return False
+        item = request.meta['book_item']
+        book_id = item.get('book_id')
+        if book_id in self.visited_ids:
+            return True
+        self.visited_ids.add(book_id)
+        return False
 
 class SpiderBooksSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
@@ -78,6 +94,8 @@ class SpiderBooksDownloaderMiddleware:
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
+        # request.cookies = {}
+        # request.meta['proxy'] = 'http://'
         return None
 
     def process_response(self, request, response, spider):

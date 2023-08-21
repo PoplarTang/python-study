@@ -5,6 +5,7 @@ import sys
 import time
 import random
 
+
 ENEMY_COUNT = 10
 SCREEN_WIDTH = 512
 SCREEN_HEIGHT = 768
@@ -400,27 +401,6 @@ def handleEvent(player1, player2):
                 pygame.quit()
                 sys.exit()
 
-            if event.key == K_a:
-                player1.move_left()
-            elif event.key == K_d:
-                player1.move_right()
-            elif event.key == K_w:
-                player1.move_up()
-            elif event.key == K_s:
-                player1.move_down()
-            elif event.key == K_SPACE:
-                player1.fire()
-
-            if event.key == K_LEFT:
-                player2.move_left()
-            elif event.key == K_RIGHT:
-                player2.move_right()
-            elif event.key == K_UP:
-                player2.move_up()
-            elif event.key == K_DOWN:
-                player2.move_down()
-            elif event.key == K_KP_PLUS or event.key == K_KP_ENTER:
-                player2.fire()
 
     pressed_keys = pygame.key.get_pressed()
     if pressed_keys[K_a]:
@@ -443,6 +423,9 @@ def handleEvent(player1, player2):
         player2.move_up()
     elif pressed_keys[K_DOWN]:
         player2.move_down()
+
+    if pressed_keys[K_KP_ENTER]:
+        player2.fire()
 
 
 if __name__ == '__main__':
